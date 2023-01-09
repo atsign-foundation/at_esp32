@@ -28,3 +28,5 @@ All rights reserved.
 
 - [JeremyTubongbanua](https://github.com/JeremyTubongbanua)
 - [TylerTrott](https://github.com/TylerTrott)
+- [cpswan](https://github.com/cpswan)
+- [cconstab](https://github.com/cconstab)
