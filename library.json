@@ -1,0 +1,33 @@
+{
+    "name": "at_client",
+    "version": "0.0.1",
+    "description": "atPlatform implementation in the ESP32 (Arduino C++)",
+    "keywords": "encryption, aes256ctr, aesctr, aes, aes256, rsa, rsa2048, privacy, platform, framework",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/atsign-foundation/at_esp32"
+    },
+    "authors": [
+        {
+
+            "name": "Jeremy Tubongbanua",
+            "email": "jeremy.tubongbanua@atsign.com",
+            "url": "https://atsign.com",
+            "maintainer": true
+        },
+        {
+
+            "name": "Tyler Trott",
+            "email": "tyler.trott@atsign.com",
+            "url": "https://atsign.com",
+            "maintainer": true
+        }
+    ],
+    "license": "BSD-3-Clause",
+    "homepage": "https://atsign.com",
+    "dependencies": {
+
+    },
+    "frameworks": "*",
+    "platforms": "*"
+}
