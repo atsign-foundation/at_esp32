@@ -28,6 +28,6 @@
     "dependencies": {
 
     },
-    "frameworks": "*",
-    "platforms": "*"
+    "frameworks": "arduino",
+    "platforms": "espressif32"
 }
