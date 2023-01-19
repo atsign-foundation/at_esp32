@@ -17,7 +17,6 @@ unsigned char *encryptKey(string to_encrypt, const unsigned char key_to_encrypt_
 {
   // Start by initializing vars
   size_t to_encrypt_len = to_encrypt.length();
-  // size_t *bufLen = new size_t;
   size_t *outputSize = 0;
 
   mbedtls_pk_context pk;
@@ -25,15 +24,7 @@ unsigned char *encryptKey(string to_encrypt, const unsigned char key_to_encrypt_
 
   mbedtls_ctr_drbg_context ctr_drbg;
   mbedtls_ctr_drbg_init(&ctr_drbg);
-  // const unsigned char *key = (const unsigned char *)key_to_encrypt_with.c_str();
   unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
-  // void *myThing = (void *)key;
-
-  // mbedtls_pk_setup_rsa_alt(&pk, myThing, NULL, NULL, NULL);
-  /*
-   * Calculate the RSA encryption of the data.
-   * If encrypt function returns 0, then it was successful
-   */
 
   Serial.begin(115200);
   if (!SPIFFS.begin(true))
@@ -52,8 +43,6 @@ unsigned char *encryptKey(string to_encrypt, const unsigned char key_to_encrypt_
   }
 
   file.print(key_to_encrypt_with);
-
-  // cout << "File rewind: " << file.rewindDirectory() << endl;
 
   mbedtls_pk_free(&pk);
   int ret = 0;
