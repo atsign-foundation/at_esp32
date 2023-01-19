@@ -6,38 +6,12 @@
 #include <mbedtls/pk.h>
 #include <mbedtls/ctr_drbg.h>
 #include <fstream>
-#include <iomanip>
-#include <mbedtls/entropy.h>
 #include "mbedtls/pk.h"
-#include <iterator>
-#include <SD.h>
-
-#include "base64.h"
 
 // for reading files on esp32
 #include "SPIFFS.h"
-#include "esp_tls.h"
 
 using namespace std;
-
-void printbytes(const unsigned char *input, const size_t &length)
-{
-  string output = "";
-  for (std::uint32_t i = 0; i < length; i++)
-  {
-    std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)input[i] << " ";
-    if (i == 0)
-    {
-      string str(1, input[i]);
-      output = str;
-    }
-    string str(1, input[i]);
-    str.push_back(input[i]);
-    output = output + str;
-  }
-  std::cout << std::endl;
-  cout << "printbytes output: " << output << endl;
-}
 
 unsigned char *encryptKey(string to_encrypt, const unsigned char key_to_encrypt_with)
 {
