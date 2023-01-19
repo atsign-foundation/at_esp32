@@ -35,6 +35,7 @@ Core assets used in this project:
 - [ESP32-WROOM](https://www.espressif.com/en/products/modules/esp32)
 - [PlatformIO](https://platformio.org/)
 - [Mbed-TLS](https://github.com/Mbed-TLS/mbedtls)
+- [mtausig's tiny-asn1](https://gitlab.com/mtausig/tiny-asn1)
 
 ## Contribute
 

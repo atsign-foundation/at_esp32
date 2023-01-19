@@ -1,159 +1,118 @@
-#include <mbedtls/rsa.h>
+
 #include <iostream>
-#include <string>
-#include <stdio.h>
-#include <string.h>
-#include <mbedtls/pk.h>
-#include <mbedtls/ctr_drbg.h>
-#include <fstream>
-#include <iomanip>
-#include <mbedtls/entropy.h>
-#include "mbedtls/pk.h"
-
+#include <vector>
+#include <mbedtls/base64.h>
 #include "base64.h"
+#include <mbedtls/asn1.h>
+#include "tiny-asn1.h"
 
-// for reading files on esp32
-#include "SPIFFS.h"
-#include "esp_tls.h"
-
-using namespace std;
-
-void printbytes(const unsigned char *input, const size_t &length)
+void convert(const std::string &s, std::vector<uint8_t> &v)
 {
-  string output = "";
-  for (std::uint32_t i = 0; i < length; i++)
-  {
-    std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)input[i] << " ";
-    if (i == 0)
-    {
-      string str(1, input[i]);
-      output = str;
+	v = base64::base64_decode(s);
+}
+
+
+void print_hex(const uint8_t* data, unsigned int len)
+{
+  unsigned int count = 0;
+  unsigned int blockCount = 0;
+  while(count < len) {
+    printf("%02x ", data[count]);
+    ++count;
+    ++blockCount;
+    if(blockCount == 4)
+      printf("  ");
+    if(blockCount == 8) {
+      printf("\n");
+      blockCount = 0;
     }
-    string str(1, input[i]);
-    str.push_back(input[i]);
-    output = output + str;
   }
-  std::cout << std::endl;
-  cout << "printbytes output: " << output << endl;
+  printf("\n");
 }
 
-void encryptKey(string to_encrypt, const unsigned char key_to_encrypt_with)
+
+void print_asn1(const asn1_tree* list, int depth)
 {
-  // Start by initializing vars
-  size_t to_encrypt_len = to_encrypt.length();
-  // size_t *bufLen = new size_t;
-  size_t *outputSize = 0;
-
-  mbedtls_pk_context pk;
-  mbedtls_pk_init(&pk);
-
-  mbedtls_ctr_drbg_context ctr_drbg;
-  mbedtls_ctr_drbg_init(&ctr_drbg);
-  // const unsigned char *key = (const unsigned char *)key_to_encrypt_with.c_str();
-  unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
-  // void *myThing = (void *)key;
-
-  // mbedtls_pk_setup_rsa_alt(&pk, myThing, NULL, NULL, NULL);
-  /*
-   * Calculate the RSA encryption of the data.
-   * If encrypt function returns 0, then it was successful
-   */
-
-  // initializing a serial connection
-  // Serial.begin(115200);
-  // if (!SPIFFS.begin(true))
-  // {
-  //   Serial.println("An error has occurred while mounting SPIFFS");
-  //   return;
-  // }
-  // create a new file to house public key
-  // File file = SPIFFS.open("/test.pub", FILE_WRITE);
-
-  // if (!file)
-  // {
-  //   Serial.println("There was an error opening the file for writing");
-  //   return;
-  // }
-
-  // write the key to the file
-  // file.print(key_to_encrypt_with);
-  // file.close();
-
-  Serial.begin(115200);
-  if (!SPIFFS.begin(true))
-  {
-    Serial.println("An error has occurred while mounting SPIFFS");
-    return;
-  }
-  // create a new file to house public key
-  SPIFFS.begin();
-  File file = SPIFFS.open("/test.pub", "w");
-  if (!file)
-  {
-    Serial.println("There was an error opening the file for writing");
-    return;
+  std::cout << "d=" << depth << ", Tag: " << std::hex << list->type << ", len=" << list->length << std::endl;
+  if(list->child == NULL) {
+    printf("Value:\n");
+    print_hex(list->data, list->length);
+  } else {
+    print_asn1(list->child, depth+1);
   }
 
-  file.print(key_to_encrypt_with);
-
-  file.close();
-
-  mbedtls_pk_free(&pk);
-  int ret = 0;
-  if ((ret = mbedtls_pk_parse_public_keyfile(&pk, "spiffs/test.pub")) != 0)
-  {
-    /**
-     * This is where code breaks -> Jan 18
-     * parse_public_keyfile needs path of file
-     */
-    cout << "Error in retrieving key" << endl;
-    return;
-  }
-
-  mbedtls_pk_encrypt(&pk, &key_to_encrypt_with, to_encrypt_len, buf, outputSize, sizeof(buf),
-                     mbedtls_ctr_drbg_random, &ctr_drbg);
-
-  if ((ret = mbedtls_pk_encrypt(&pk, &key_to_encrypt_with, to_encrypt_len, buf, outputSize, sizeof(buf), mbedtls_ctr_drbg_random, &ctr_drbg)) != 0)
-  {
-    cout << "Error in encrypting" << endl;
-  };
+  if(list->next != NULL)
+    print_asn1(list->next, depth);
 }
 
-/**
- * This function is used to test reading/writing files on the esp32
- * Jan 18 -> testFiles functions as expected
- */
-void testFiles(const unsigned char key_to_encrypt_with)
-{
-  // initializing a serial connection
-  Serial.begin(115200);
-  if (!SPIFFS.begin(true))
-  {
-    Serial.println("An error has occurred while mounting SPIFFS");
-    return;
-  }
-  // create a new file to house public key
-  File file = SPIFFS.open("/test.pub", "w");
-  if (!file)
-  {
-    Serial.println("There was an error opening the file for writing");
-    return;
-  }
-
-  file.print(key_to_encrypt_with);
-  file.close();
-
-  file = SPIFFS.open("/test.txt", FILE_READ);
-  cout << "File contents: " << endl;
-  String s = file.readStringUntil('\n');
-  Serial.println(s);
-  file.close();
-}
 
 void setup()
 {
-  const unsigned char myKey = 'IIW+bRGEEJsgGJvE3bTcVALARDSNFr4mMNNS2JgoCCx5UaYUwfGq0lbH7yYREi+9pSWTReXXJOnsEqm9LfSfw0lfKlomR7OQQmdwIRQeiOBj+ZAee0Rb0PC6yAIgap6Zrb+sS0HIdO9FR3jXG2sDdw9+Y28XyfvPi0+l4N/kOKsW+toimEHh03J1d1CGFB3zef+WCqeS7YuShvOBYx8CK08CtF6muIqOBATzrwAk0DJilZqwlsF2jg8koere7XstRmyvwjHumtFEAeI0aD7mSp2iJhfTaPPXx5fjccDLyiU7bObkqtFCj+5cf2rS70S+UcZ4/Ir8kdAf9Tt/ZkEq0/oujv4TTq0ookCr32CtsvUxs61d9PjyNN7iAfVb/KUKqd3Kjhrfkirbh4cRhXZv24x1SxXt1lfpFPAepQ7k0afC/0FvqMBllFPctWkI+FAzgVDyi4OCp6VUxZrqNWaXjZE3FMCgCx9nzM7PsfmeoGkXnakhf/tjY4irPNTZ0EGec0s7Ijipk0tVQOFpyMARTA==';
-  encryptKey("I like to eat pizza", myKey);
-  // testFiles(myKey);
-};
-void loop(){};
+	// base64 encoded RSA-2048 public key
+	const auto public_key_base64 = std::string{""};
+
+	// base64 encoded RSA-2048 private key
+	const auto private_key_base64 = std::string{"MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCEzYZ5jImqMsvbCC2fDHRVFN2+MOAhMJcDs0SucuFub2Q8MARDi05jnz4fdxoQ2okLqm3ke/A5GlCe/vR76euOiRDHwTL73Hoquc00CAXytDK0uirXxfnGn+jp7qksY2BcpLSWyqqDmRSTtWBbg+i6h6aTfahPXHPsihBN9Uvdnd4fWZprP2Ctnov29DdgP6TJ92oI2kvDM9LreBYPfjBvFTw6BTzAugkkD4bG8/B0OLeGgPia7J0g7ecljAg8ZzBDp1fuIyOCSIbW3OYvaKnA8+rHvFAqcPg/sLKr9KVgrli916bpiizVO8jEA6/J4nafUhCfN7XTpnXCFp2BMuylAgMBAAECggEAXuSw+zd1wvzq94afeq+ejJENZXJtJKogrk8xe2mxNYU43Vz+HvlyuPK3pCopoPNWy9QrFAGPhG4OP540OjrKy52bNPETKi6/yLndLBmzjlo+hS8ln+rh8JChEE8t6P7Vgz1ZoQoNz1zZ/DW1NY9LA8YcO/WlB5graVC6F8p4PFEigG7vuhpoA5henkVfTVnXmiYkaA0GQ/brOBPXyzXHhYdNjAY5pSpeqgpUxhltY2n75CGWnoMWu1HhDTvGVhsroqZqAnkGugWSpA8byFOPLgI6l6sjQZXpdSHuNxPxyah25Bh6OpDeWJhfmFyPIosWbYXCUAUATHOf7gSADMGMgQKBgQDGwbihOz5ZdxXrD3kLIMJMaqhY8nXdWPjrOd2Zqa5CLheCVvBGVHNKtYZkHRFi3OFgGvqkTNjdiBAidJ23i7dQ/SqKvqM/SDpYFFJk+nhbAAg4BGIEapt8KWh2KLv9rpPWtF2YFVLPd3b3z1iCbmNzIIrL1Aesj96rYmD+t0N2hQKBgQCrDQq0M/pCf9WlzenXz5dLvojfwUM1XVPjCUGThYQU6wtuQ7DMT5N7GKHL9DbtzOsSZZigsjIi74xiMQnZC/NkjIgzkQUR8zHFz/D3yFXdfGjo47H3OvFrV6EDfrBEY816q5nDVAK/i69ljCk0JuZbNH7x+XTAN12w1d1Dr1THoQKBgE1JTw4DB3+qeu9omNzm5Cbq4oOT5Jkp28E8QxtZi9VYLvQT8mKmvB408AlF9FjJIypH02bIKxwZqIx9ZEbXIXVwvHYvIzOcVnOhk1iIvPxFyuxdZ+/ntIZXY7Nuq4s9s2ctw6c7w3PBNJWwHu65FhrScKZJ0KIdX6ytGKJziNwxAoGAezxlNtmv95NEaTXGwY610YOP962071CzLIKxtUhflfaWALZSPZEjj296uofTv1aBEnsSEMzx5Eu0V9Y+4xqCHDJHuudDwN/3Py6GzO6QNof4ybmqsZXM8+ppfiwbcNp642OY36q6ZCiOkNn/oaxZEOLshweT/xykqtAanzZGHaECgYAoqejWFqzGa1Oor5qNxfb6qtgGon3X60wgEJccpddFzeoyRLZOEcUkOBdkyvAR+UkWFcjyqU67nS1vYSdY8ZyMxP6eIsdcuvh3WzJJPcqRxJIGBFN55FOgt3t0qLiEwjrrL2mF+cGoPyFWfeM8urkqslc2lAbXAfohvbq/kiILew=="};
+
+	std::vector<uint8_t> b;
+
+	convert(private_key_base64, b);
+
+	std::cout << "size: " << b.size() << std::endl;
+	for(std::uint32_t i = 0; i < b.size(); i++) {
+		std::cout << b[i] << " ";
+
+	}
+	std::cout << std::endl;
+
+	std::uint8_t *input = b.data();
+	const size_t input_length = b.size();
+
+	std::uint32_t asn1_object_count = der_object_count(input, input_length);
+	asn1_tree* asn1_objects = (asn1_tree*) (malloc(sizeof(asn1_tree) * asn1_object_count));
+	asn1_tree cms;
+	der_decode(input, input_length, &cms, asn1_objects, asn1_object_count);
+	// print_asn1(&cms, 0);
+
+	// for(std::uint32_t i = 0; i < 5; i++) {
+		print_asn1(&cms, 1);
+	// }
+
+	/**
+	 * @brief int32_t asn1_object_count = der_object_count(cms_data, file_size);
+	if(asn1_object_count < 0) {
+		fprintf(stderr, "ERROR: Could not calculate the number of Elements within the data.\n");
+		free(cms_data);
+    	return 1;
+  	}
+
+	asn1_tree* asn1_objects = (asn1_tree*)(malloc(sizeof(asn1_tree) * asn1_object_count));
+  	if(asn1_objects == NULL){
+		fprintf(stderr, "ERROR: Could not allocate the memory for the ASN.1 objects.\n");
+		free(cms_data);
+    	return 1;
+  	}
+
+  	asn1_tree cms;
+
+  	if(der_decode(cms_data, file_size, &cms, asn1_objects, asn1_object_count) < 0) {
+		fprintf(stderr, "ERROR: Could not parse the data.\n");
+		free(cms_data);
+    	return 1;
+  	}
+
+	 * 
+	 */
+
+	// const unsigned int obj_count = der_object_count(input, input_length);
+	// asn1_tree *out_objects = new asn1_tree[obj_count];
+	// asn1_tree *out = (asn1_tree *) malloc(sizeof(asn1_tree));
+
+	// der_decode(input, input_length, out, out_objects, obj_count);
+
+	
+}
+
+void loop()
+{
+}
