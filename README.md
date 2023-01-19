@@ -38,6 +38,31 @@ Core assets used in this project:
 
 ## Contribute
 
+1. Open VSCode and install the PlatformIO VScode extension. You will use this extension to interact with the ESP32. Go to the PlatformIO Home (if you lost it just open the command palette and search and run the `PlatformIO: Home` command) and install the `Espressif32` platform by clicking on the `Platforms` tab and searching for `Espressif32` and clicking on the `Install` button.
+
+2. Make a fork of this repository and git clone it to your local machine.
+
+```
+git clone <YOUR_FORK_URL> <path
+```
+
+3. Open the PlatformIO CLI by doing `Ctrl (or Cmd) + Shift + P` and run the `PlatformIO: Open PlatformIO Core CLI` command to open the CLI terminal. Then run the following command in the Platform CLI to initialize the `.pio` file.
+
+```
+pio project init
+```
+
+4. Create a `main.cpp` file in the `src` folder and add the following code:
+
+This will allow you to compile the code. 
+
+```cpp
+void setup() {};
+void loop() {};
+```
+
+5. Open the command palette with `Ctrl (or Cmd) + Shift + P` and run the `PlatformIO: Build` command to build the project. You should get no errors and the terminal should output a build successful. If you get an error, ensure you are executing the commands in the root of the project (the same folder as the `platformio.ini` file).
+
 Any and all pull requests are appreciated and welcome. Please read our [contributing guidelines](CONTRIBUTING.md) containing detailed instructions on how to contribute correctly and create a proper pull request. If you have any questions, please feel free to reach out to us on our [Discord server](https://discord.atsign.com).
 
 ## License
