@@ -99,7 +99,7 @@ void print_asn1(const asn1_tree *list, int depth)
         print_asn1(list->next, depth);
 }
 
-rsa_public_key::rsa_public_key(std::string rsa_public_key_base64_encoded)
+rsa_2048::public_key::public_key(const std::string &rsa_public_key_base64_encoded)
 {
     std::vector<uint8_t> a;
     a = base64::base64_decode(rsa_public_key_base64_encoded);
@@ -136,13 +136,13 @@ rsa_public_key::rsa_public_key(std::string rsa_public_key_base64_encoded)
     e = get_hex_string(cms_ptr1->child->next->data, cms_ptr1->child->next->length);
 }
 
-rsa_public_key::rsa_public_key(std::string n_hex, std::string e_hex)
+rsa_2048::public_key::public_key(const std::string &n_hex, const std::string &e_hex)
 {
     n = n_hex;
     e = e_hex;
 }
 
-rsa_private_key::rsa_private_key(std::string rsa_private_key_base64_encoded)
+rsa_2048::private_key::private_key(const std::string &rsa_private_key_base64_encoded)
 {
     std::vector<uint8_t> a;
     a = base64::base64_decode(rsa_private_key_base64_encoded);
