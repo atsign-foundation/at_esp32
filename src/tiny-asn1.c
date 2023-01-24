@@ -14,7 +14,6 @@
 
 #include "tiny-asn1.h"
 
-
 uint32_t fetch_tlv_length(const uint8_t *in, uint32_t inlen, uint32_t *data_offset)
 {
   uint32_t x, z;
