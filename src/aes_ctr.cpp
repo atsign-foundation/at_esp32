@@ -2,8 +2,11 @@
 #include <iomanip>
 #include <vector>
 #include <mbedtls/aes.h>
+#include <mbedtls/rsa.h>
 #include "aes_ctr.h"
 #include "base64.h"
+#include <mbedtls/rsa_internal.h>
+#include <mbedtls/pk.h>
 
 #define ARRAY_SIZE 256
 
@@ -20,7 +23,8 @@ std::string aes_ctr::decrypt(const std::string &cipher_text_base64, const std::s
     inject(key_bytes, key, key_length);
 
     const std::vector<unsigned char> encrypted_text_bytes = base64::base64_decode(cipher_text_base64);
-    const size_t encrypted_text_len = encrypted_text_bytes.size();
+    // const size_t encrypted_text_len = encrypted_text_bytes.size();
+    const size_t encrypted_text_len = 2048;
     unsigned char encrypted_text[encrypted_text_len] = {0};
     inject(encrypted_text_bytes, encrypted_text, encrypted_text_len);
 
@@ -107,7 +111,7 @@ std::string unhexlify(const unsigned char *input)
     // index i until 0x08
     std::uint32_t i = 0;
     char c = input[i];
-    while (c != 0x00 && c != 0x05 && c != 0x08)
+    while (base64::base64_chars.find(c) != std::string::npos)
     {
         str += c;
         i++;
@@ -123,6 +127,7 @@ void print_bytes(const unsigned char *input, const size_t &length)
         std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)input[i] << " ";
     }
     std::cout << std::endl;
+    
 }
 
 void print_bytes_as_base64_encoded(const unsigned char *input, const size_t &length)
