@@ -168,7 +168,7 @@ std::string rsa_2048::sign(const std::string &challenge, const private_key &priv
     unsigned char signature[256];
 
     int ret = mbedtls_rsa_pkcs1_sign(&rsa, NULL, NULL, MBEDTLS_RSA_PRIVATE, MBEDTLS_MD_SHA256, 0, hash, signature);
-    // std::cout << "sign success: " << ret << std::endl;
+    std::cout << "sign success: " << ret << std::endl;
 
     // for (std::uint32_t i = 0; i < 256; i++)
     // {
@@ -182,6 +182,107 @@ std::string rsa_2048::sign(const std::string &challenge, const private_key &priv
     return signature_base64;
 }
 
+std::string rsa_2048::encrypt(const std::string &plain_text, const public_key &public_key_base64)
+{ // not working
+    mbedtls_rsa_context rsa;
+    mbedtls_rsa_init(&rsa, MBEDTLS_RSA_PKCS_V15, 0);
+
+    mbedtls_mpi n, e;
+    mbedtls_mpi_init(&n);
+    mbedtls_mpi_init(&e);
+
+    mbedtls_mpi_read_string(&n, 16, (public_key_base64.n.c_str()));
+    mbedtls_mpi_read_string(&e, 16, (public_key_base64.e.c_str()));
+
+    std::cout << "import: " << mbedtls_rsa_import(&rsa, &n, NULL, NULL, NULL, &e) << std::endl;
+
+    std::cout << "complete: " << mbedtls_rsa_complete(&rsa) << std::endl;
+    std::cout << "public key check: " << mbedtls_rsa_check_pubkey(&rsa) << std::endl;
+
+    unsigned char output[256] = {0};
+    std::cout << "plain_text: " << plain_text << std::endl;
+    const auto bytes = base64::base64_decode(plain_text);
+    // display bytes
+    for (std::uint32_t i = 0; i < bytes.size(); i++)
+    {
+        std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)bytes[i] << " ";
+    }
+    std::cout << std::endl << std::resetiosflags(std::ios::hex);
+    mbedtls_entropy_context entropy;
+    mbedtls_entropy_init(&entropy);
+    mbedtls_ctr_drbg_context ctr_drbg;
+    mbedtls_ctr_drbg_init(&ctr_drbg);
+    std::cout << "seed: " << mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
+                                &entropy, (const unsigned char *) "0000000000000000",
+                                std::string{"0000000000000000"}.size());
+
+    std::cout << "encrypt: " << mbedtls_rsa_pkcs1_encrypt(&rsa, NULL, NULL, MBEDTLS_RSA_PUBLIC, bytes.size(), bytes.data(), output) << std::endl;
+
+    const auto encrypted_base64 = base64::base64_encode(output, 256);
+    return encrypted_base64;
+
+}
+
+std::string rsa_2048::decrypt(const std::string &cipher_text_base64, const private_key &private_key)
+{
+    mbedtls_rsa_context rsa;
+    mbedtls_mpi n, e, d, p, q;
+    mbedtls_mpi_init(&n);
+    mbedtls_mpi_init(&e);
+    mbedtls_mpi_init(&d);
+    mbedtls_mpi_init(&p);
+    mbedtls_mpi_init(&q);
+
+    mbedtls_mpi_read_string(&n, 16, (private_key.n.c_str()));
+    mbedtls_mpi_read_string(&e, 16, (private_key.e.c_str()));
+    mbedtls_mpi_read_string(&d, 16, (private_key.d.c_str()));
+    mbedtls_mpi_read_string(&p, 16, (private_key.p.c_str()));
+    mbedtls_mpi_read_string(&q, 16, (private_key.q.c_str()));
+
+    // std::cout << "n: " << private_key.n << std::endl;
+    // std::cout << "e: " << private_key.e << std::endl;
+    // std::cout << "d: " << private_key.d << std::endl;
+    // std::cout << "p: " << private_key.p << std::endl;
+    // std::cout << "q: " << private_key.q << std::endl;
+
+    mbedtls_rsa_init(&rsa, MBEDTLS_RSA_PKCS_V15, 0);
+
+    std::cout << "import: " << mbedtls_rsa_import(&rsa, &n, &p, &q, &d, &e) << std::endl;
+
+    std::cout << "complete: " << mbedtls_rsa_complete(&rsa) << std::endl;
+
+
+    std::cout << "private key check: " << mbedtls_rsa_check_privkey(&rsa) << std::endl;
+
+    unsigned char output[256] = {0};
+    const std::vector<unsigned char> bytes = base64::base64_decode(cipher_text_base64);
+    // display bytes
+    // for (std::uint32_t i = 0; i < bytes.size(); i++)
+    // {
+    //     std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)bytes[i] << " ";
+    // }
+    // std::cout << std::endl << std::resetiosflags(std::ios::hex);
+
+    std::size_t *i = new std::size_t{bytes.size()};
+    // std::size_t *i = new std::size_t{cipher_text_base64.size()};
+
+    int ret = mbedtls_rsa_pkcs1_decrypt(&rsa, NULL, NULL, MBEDTLS_RSA_PRIVATE, i, bytes.data(), output, 256);
+
+    std::cout << "decrypted: " << ret << std::endl;
+
+    // display output
+    for (std::uint32_t i = 0; i < 256; i++)
+    {
+        std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)output[i] << " ";
+    }
+    std::cout << std::endl << std::resetiosflags(std::ios::hex);
+
+    const auto unhexlified = unhexlify(get_hex_string(output, 256));
+    const auto decrypted_base64 = std::string{unhexlified.begin(), unhexlified.end()};
+
+    return decrypted_base64;
+    // mbedtls_rsa_pkcs1_decrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg, &i, buf, result, 1024);
+}
 // ==================== rsa_2048.h implementations ====================
 
 // ==================== helper implementations ====================
