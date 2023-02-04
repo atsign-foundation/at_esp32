@@ -62,9 +62,15 @@ std::string at_secondary_connection::execute_command(WiFiClientSecure &secondary
     secondary_client.print(data.c_str());
     secondary_client.print("\n");
     char status[5192] = {0};
-    delay(1000);
+    delay(500);
     secondary_client.readBytesUntil('\r', status, sizeof(status));
-    delay(1000);
-    std::string ret = std::string{status}.substr(0, std::string{status}.find_first_of("\n"));
+    delay(500);
+    size_t n_pos = std::string{status}.find_first_of("\n");
+    std::string ret;
+    if(n_pos != std::string::npos){
+        ret = std::string{status}.substr(0, n_pos);
+    } else {
+        ret = std::string{status};
+    }
     return ret;
 };
