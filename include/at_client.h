@@ -7,6 +7,7 @@
 #include "at_sign.h"
 #include "at_root_connection.h"
 #include "at_secondary_connection.h"
+#include "at_key.h"
 
 class AtClient
 {
@@ -22,4 +23,7 @@ public:
 
     std::string execute_command(const std::string &command);
     bool pkam_authenticate(const std::string &private_key);
+    void put_ak(const AtKey &at_key, const std::string &value);
+    std::string get_ak(const AtKey &at_key);
+    void delete_ak(const AtKey &at_key);
 };
