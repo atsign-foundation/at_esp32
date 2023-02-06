@@ -278,7 +278,10 @@ std::string rsa_2048::decrypt(const std::string &cipher_text_base64, const priva
     std::cout << std::endl << std::resetiosflags(std::ios::hex);
 
     const auto unhexlified = unhexlify(get_hex_string(output, 256));
-    const auto decrypted_base64 = std::string{unhexlified.begin(), unhexlified.end()};
+    // decrypted_base64 is string from beginning to null terminator or end
+    // find index of unhexlified that is 00
+    const auto null_terminator_index = std::find(unhexlified.begin(), unhexlified.end(), '\0');
+    const auto decrypted_base64 = std::string{unhexlified.begin(), null_terminator_index};
 
     return decrypted_base64;
     // mbedtls_rsa_pkcs1_decrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg, &i, buf, result, 1024);
