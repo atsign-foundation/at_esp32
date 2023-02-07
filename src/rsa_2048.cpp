@@ -4,6 +4,9 @@
 #include <iomanip>
 #include <stdlib.h>
 #include <mbedtls/rsa.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
+#include <algorithm>
 #include "base64.h"
 #include "tiny-asn1.h"
 #include "rsa_2048.h"
@@ -184,6 +187,8 @@ std::string rsa_2048::sign(const std::string &challenge, const private_key &priv
 
 std::string rsa_2048::encrypt(const std::string &plain_text, const public_key &public_key_base64)
 { // not working
+
+    // intiializes rsa functions with n and e
     mbedtls_rsa_context rsa;
     mbedtls_rsa_init(&rsa, MBEDTLS_RSA_PKCS_V15, 0);
 
@@ -194,12 +199,18 @@ std::string rsa_2048::encrypt(const std::string &plain_text, const public_key &p
     mbedtls_mpi_read_string(&n, 16, (public_key_base64.n.c_str()));
     mbedtls_mpi_read_string(&e, 16, (public_key_base64.e.c_str()));
 
+    // import n and e, outputs 0 if successful
     std::cout << "import: " << mbedtls_rsa_import(&rsa, &n, NULL, NULL, NULL, &e) << std::endl;
 
+    // context can be used
     std::cout << "complete: " << mbedtls_rsa_complete(&rsa) << std::endl;
+
+    // public key is valid
     std::cout << "public key check: " << mbedtls_rsa_check_pubkey(&rsa) << std::endl;
 
     unsigned char output[256] = {0};
+
+    // transform base64 plain text to bytes
     std::cout << "plain_text: " << plain_text << std::endl;
     const auto bytes = base64::base64_decode(plain_text);
     // display bytes
@@ -208,15 +219,20 @@ std::string rsa_2048::encrypt(const std::string &plain_text, const public_key &p
         std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)bytes[i] << " ";
     }
     std::cout << std::endl << std::resetiosflags(std::ios::hex);
+
+
     mbedtls_entropy_context entropy;
     mbedtls_entropy_init(&entropy);
     mbedtls_ctr_drbg_context ctr_drbg;
     mbedtls_ctr_drbg_init(&ctr_drbg);
-    std::cout << "seed: " << mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
-                                &entropy, (const unsigned char *) "0000000000000000",
-                                std::string{"0000000000000000"}.size());
 
-    std::cout << "encrypt: " << mbedtls_rsa_pkcs1_encrypt(&rsa, NULL, NULL, MBEDTLS_RSA_PUBLIC, bytes.size(), bytes.data(), output) << std::endl;
+    std::cout << "seed: " << mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
+                                &entropy, (const unsigned char *) "rsa_encrypt",
+                                std::string{"rsa_encrypt"}.size()) << std::endl;
+
+    int ret = mbedtls_rsa_pkcs1_encrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg, MBEDTLS_RSA_PUBLIC, bytes.size(), bytes.data(), output);
+    // int ret = mbedtls_rsa_pkcs1_encrypt(&rsa, mbedtls_ctr_drbg_random, nullptr, MBEDTLS_RSA_PUBLIC, bytes.size(), bytes.data(), output);
+    std::cout << "encrypt: " <<  ret << std::endl;
 
     const auto encrypted_base64 = base64::base64_encode(output, 256);
     return encrypted_base64;
@@ -278,7 +294,10 @@ std::string rsa_2048::decrypt(const std::string &cipher_text_base64, const priva
     std::cout << std::endl << std::resetiosflags(std::ios::hex);
 
     const auto unhexlified = unhexlify(get_hex_string(output, 256));
-    const auto decrypted_base64 = std::string{unhexlified.begin(), unhexlified.end()};
+    // decrypted_base64 is string from beginning to null terminator or end
+    // find index of unhexlified that is 00
+    const auto null_terminator_index = std::find(unhexlified.begin(), unhexlified.end(), '\0');
+    const auto decrypted_base64 = std::string{unhexlified.begin(), null_terminator_index};
 
     return decrypted_base64;
     // mbedtls_rsa_pkcs1_decrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg, &i, buf, result, 1024);

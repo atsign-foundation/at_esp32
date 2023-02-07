@@ -1,13 +1,12 @@
 
+#pragma once
+
 #include <cstdint>
 #include <WiFiClientSecure.h>
 
 namespace at_secondary_connection
 {
-    struct connection
-    {
-        WiFiClientSecure client;
-    };
-    bool connect(connection &conn, const std::string &host, const std::uint16_t &port);
-    std::string execute_command(connection &conn, const std::string &data);
+    bool connect(WiFiClientSecure &secondary_client, const std::string &host, const std::uint16_t &port);
+    std::string execute_command(WiFiClientSecure &secondary_client, const std::string &data);
+    bool pkam_authenticate(WiFiClientSecure &secondary_client, const std::string &pkam_private_key_base64, const std::string &at_sign);
 }
