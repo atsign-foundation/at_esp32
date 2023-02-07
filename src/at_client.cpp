@@ -17,7 +17,7 @@ std::string AtClient::execute_command(const std::string &command)
 bool AtClient::pkam_authenticate(const std::string &private_key)
 {
     bool wifi_connected = at_root_connection::init_wifi(WIFI_SSID, WIFI_PASSWORD);
-    bool root_connected = at_root_connection::connect(root_client, "root.atsign.org", 64);
+    bool root_connected = at_root_connection::connect(root_client, ROOT_DOMAIN, ROOT_PORT);
     if (root_connected)
     {
         std::string res = at_root_connection::send(root_client, at_sign.without_prefix());
