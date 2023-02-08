@@ -211,15 +211,16 @@ std::string rsa_2048::encrypt(const std::string &plain_text, const public_key &p
     unsigned char output[256] = {0};
 
     // transform base64 plain text to bytes
-    std::cout << "plain_text: " << plain_text << std::endl;
-    const auto bytes = base64::base64_decode(plain_text);
+    std::cout << "plain_text: \"" << plain_text << "\"" << std::endl;
+    const unsigned char *buffer = (unsigned char *)plain_text.c_str();
+    const auto bytes = base64::base64_decode(base64::base64_encode(buffer, plain_text.size()));
+    std::cout << "bytes size: " << bytes.size() << std::endl;
     // display bytes
     for (std::uint32_t i = 0; i < bytes.size(); i++)
     {
         std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)bytes[i] << " ";
     }
     std::cout << std::endl << std::resetiosflags(std::ios::hex);
-
 
     mbedtls_entropy_context entropy;
     mbedtls_entropy_init(&entropy);
