@@ -54,11 +54,11 @@ std::map<std::string, std::string> keys_reader::read_keys(const AtSign &at_sign)
     const std::string encrypt_public_key = aes_ctr::decrypt(aesEncryptPublicKey, self_encryption_key);
     const std::string encrypt_private_key = aes_ctr::decrypt(aesEncryptPrivateKey, self_encryption_key);
 
-    std::cout << "[1]: " << pkam_public_key << std::endl << std::endl;
-    std::cout << "[2]: " << pkam_private_key << std::endl << std::endl;
-    std::cout << "[3]: " << encrypt_public_key << std::endl << std::endl;
-    std::cout << "[4]: " << encrypt_private_key << std::endl << std::endl;
-    std::cout << "[5]: " << self_encryption_key << std::endl << std::endl;
+    // std::cout << "[1]: " << pkam_public_key << std::endl << std::endl;
+    // std::cout << "[2]: " << pkam_private_key << std::endl << std::endl;
+    // std::cout << "[3]: " << encrypt_public_key << std::endl << std::endl;
+    // std::cout << "[4]: " << encrypt_private_key << std::endl << std::endl;
+    // std::cout << "[5]: " << self_encryption_key << std::endl << std::endl;
 
     std::map<std::string, std::string> keys;
     keys.insert(std::pair<std::string, std::string>{"self_encryption_key", self_encryption_key});
