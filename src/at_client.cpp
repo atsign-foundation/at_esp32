@@ -149,5 +149,22 @@ void AtClient::put_ak(const AtKey &at_key, const std::string &value)
 
 void AtClient::delete_ak(const AtKey &at_key)
 {
-    // todo: implement
+    std::string command;
+    if (at_key.metadata->is_public != nullptr && *at_key.metadata->is_public)
+    {
+        // public key (delete:public:phone@bob)
+        command = "delete:public:" + at_key.key + at_key.shared_by->get_value();
+    }
+    else if (at_key.shared_with != nullptr)
+    {
+        // shared key (delete:@alice:phone@bob)
+        command = "delete:" + at_key.shared_with->get_value() + ":" + at_key.key + at_key.shared_by->get_value();
+    }
+    else
+    {
+        // self key (delete:phone@bob)
+        command = "delete:" + at_key.key + at_key.shared_by->get_value();
+    }
+    std::string response = execute_command(command);
+    std::cout << "response: \"" << response << "\"" << std::endl;
 };
