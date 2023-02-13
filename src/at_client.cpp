@@ -138,15 +138,16 @@ void AtClient::put_ak(const AtKey &at_key, const std::string &value)
 
         // 1. find shared key shared with me shared by them 'shared_key'
         // const auto shared_key = AtKey(std::string{"shared_key"}, at_key.shared_with, at_key.shared_by);
-        const auto aes_key_base64_encrypted = execute_command("lookup:shared_key" + at_key.shared_with->get_value());
-        std::cout << "aes_key_base64_encrypted: \"" << aes_key_base64_encrypted << "\"" << std::endl;
+        // const auto aes_key_base64_encrypted = execute_command("lookup:shared_key" + at_key.shared_with->get_value());
+        const auto aes_key_base64 = get_aes_key_shared_by_them(at_key.shared_with);
+        std::cout << "aes_key_base64: \"" << aes_key_base64 << "\"" << std::endl;
 
         rsa_2048::private_key rsa_private_key;
         rsa_2048::populate(keys["encrypt_private_key"], rsa_private_key);
 
         // decrypt aes_key_base64_encrypted with rsa_public_key
-        const auto aes_key_base64 = rsa_2048::decrypt(aes_key_base64_encrypted, rsa_private_key);
-        std::cout << "aes_key_base64 decrypted: \"" << aes_key_base64 << "\"" << std::endl;
+        // const auto aes_key_base64 = rsa_2048::decrypt(aes_key_base64_encrypted, rsa_private_key);
+        // std::cout << "aes_key_base64 decrypted: \"" << aes_key_base64 << "\"" << std::endl;
 
         // 2. encrypt value with aes_key_base64
         const auto encrypted_value = aes_ctr::encrypt(value, aes_key_base64);
