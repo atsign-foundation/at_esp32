@@ -25,7 +25,7 @@ public:
     ~AtClient() = default;
 
     std::string execute_command(const std::string &command);
-    bool pkam_authenticate();
+    bool pkam_authenticate(std::string ssid, std::string password);
     void put_ak(const AtKey &at_key, const std::string &value);
     std::string get_ak(const AtKey &at_key);
     void delete_ak(const AtKey &at_key);

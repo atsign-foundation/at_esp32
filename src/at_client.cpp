@@ -14,10 +14,10 @@ std::string AtClient::execute_command(const std::string &command)
     return data;
 };
 
-bool AtClient::pkam_authenticate()
+bool AtClient::pkam_authenticate(std::string ssid, std::string password)
 {
     const std::string private_key = keys["pkam_private_key"];
-    bool wifi_connected = at_root_connection::init_wifi(WIFI_SSID, WIFI_PASSWORD);
+    bool wifi_connected = at_root_connection::init_wifi(ssid, password);
     bool root_connected = at_root_connection::connect(root_client, ROOT_DOMAIN, ROOT_PORT);
     if (root_connected)
     {
