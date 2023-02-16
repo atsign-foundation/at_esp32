@@ -20,7 +20,7 @@ platform = espressif32
 board = esp32dev
 framework = arduino
 lib_deps = 
-    jeremytubongbanua/at_client@^0.1.1
+    jeremytubongbanua/at_client@^0.2.0
 monitor_speed = 115200
 ```
 
