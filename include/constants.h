@@ -1,6 +1,4 @@
-
-#define WIFI_SSID "***"
-#define WIFI_PASSWORD "***"
+#pragma once
 
 #define ROOT_DOMAIN "root.atsign.org"
 #define ROOT_PORT 64

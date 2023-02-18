@@ -7,5 +7,5 @@
 
 namespace keys_reader
 {
-    std::map<std::string, std::string> read_keys(const AtSign &at_sign_str);
+    std::map<std::string, std::string> read_keys(const AtSign &at_sign);
 }
