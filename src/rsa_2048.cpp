@@ -212,7 +212,8 @@ std::string rsa_2048::encrypt(const std::string &plain_text, const public_key &p
 
     // transform base64 plain text to bytes
     std::cout << "plain_text: " << plain_text << std::endl;
-    const auto bytes = base64::base64_decode(plain_text);
+    const unsigned char *buffer = (unsigned char *)plain_text.c_str();
+    const auto bytes = base64::base64_decode(base64::base64_encode(buffer, plain_text.size()));
     // display bytes
     for (std::uint32_t i = 0; i < bytes.size(); i++)
     {
