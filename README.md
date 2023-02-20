@@ -80,3 +80,4 @@ All rights reserved.
 - [TylerTrott](https://github.com/TylerTrott)
 - [cpswan](https://github.com/cpswan)
 - [cconstab](https://github.com/cconstab)
+- [XavierChanth](https://github.com/XavierChanth)
