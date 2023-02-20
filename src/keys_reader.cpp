@@ -29,7 +29,7 @@ std::map<std::string, std::string> keys_reader::read_keys(const AtSign &at_sign)
     while(file.available()){
         // Serial.write(file.read());
         int x = file.read();
-        build = build + (char)x;
+        build = build + (char) x;
     }
 
     // std::cout << "build: " << build << std::endl;

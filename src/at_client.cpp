@@ -68,6 +68,7 @@ bool AtClient::pkam_authenticate(std::string ssid, std::string password)
     return false;
 };
 
+
 std::string AtClient::get_aes_key_shared_by_them(const AtSign *at_sign_shared_by)
 {
     // shared key (lookup:key@them)
@@ -98,6 +99,27 @@ std::string AtClient::get_aes_key_shared_by_me(const AtSign *at_sign_shared_with
     return aes_key_base64;
 }
 
+void AtClient::create_shared_aes_key_for_them(const std::string &aes_key_decrypted_base64, const AtSign *at_sign_them)
+{
+    std::cout << "begin creating shared aes key for them: \"" << at_sign_them->get_value() << "\"" << std::endl;
+    // get their public key
+    const auto their_public_key = execute_command("plookup:publickey" + at_sign_them->get_value());
+
+    std::cout << "their public key: " << their_public_key << std::endl;
+
+    // populate rsa_public_key
+    rsa_2048::public_key rsa_public_key;
+    rsa_2048::populate(their_public_key, rsa_public_key);
+
+    // encrypt aes_key_base64 with their_public_key
+    const auto aes_key_encrypted_base64 = rsa_2048::encrypt(aes_key_decrypted_base64, rsa_public_key);
+
+    // store encrypted aes key
+    const auto command = "update:" + at_sign_them->get_value() + ":shared_key" + at_sign.get_value() + " " + aes_key_encrypted_base64;
+    std::cout << "command: " << command << std::endl;
+    execute_command(command);
+}
+
 std::string AtClient::get_ak(const AtKey &at_key)
 {
     std::string data;
@@ -106,23 +128,36 @@ std::string AtClient::get_ak(const AtKey &at_key)
     {
         const auto aes_key_base64 = get_aes_key_shared_by_them(at_key.shared_by);
 
-        const auto encrypted_data = execute_command("lookup:" + at_key.key + at_key.shared_by->get_value());
+        create_shared_aes_key_for_them(aes_key_base64, at_key.shared_by);
+
+        std::string command;
+        if(!at_key.namespace_str.empty())
+        {   
+            command = "lookup:" + at_key.key + "." + at_key.namespace_str + at_key.shared_by->get_value();
+        } else {
+            command = "lookup:" + at_key.key + at_key.shared_by->get_value();
+        }
+
+        const auto encrypted_data = execute_command(command);
         std::cout << "encrypted_data: \"" << encrypted_data << "\"" << std::endl;
 
         // decrypt encrypted_data with aes_key_base64
         data = aes_ctr::decrypt(encrypted_data, aes_key_base64);
     }
-    else if (at_key.metadata->is_public != nullptr)
+    else if (at_key.metadata->is_public != nullptr && at_key.shared_by != nullptr && strcmp(at_key.shared_by->get_value().c_str(), at_sign.get_value().c_str()) != 0)
     {
         // public key (plookup:key@them)
-    }
-    else if (at_key.shared_with != nullptr)
-    {
-        // shared key (lookup:key@them)
+
+        const auto command = "plookup:" + at_key.key + at_key.shared_by->get_value();
+
+        data = execute_command(command);
     }
     else
     {
         // self key (llookup:key@me)
+        const auto command = "llookup" + at_key.key + at_sign.get_value();
+
+        data = execute_command(command);
     }
 
     return data;
@@ -142,29 +177,40 @@ void AtClient::put_ak(const AtKey &at_key, const std::string &value)
         const auto aes_key_base64 = get_aes_key_shared_by_them(at_key.shared_with);
         std::cout << "aes_key_base64: \"" << aes_key_base64 << "\"" << std::endl;
 
-        rsa_2048::private_key rsa_private_key;
-        rsa_2048::populate(keys["encrypt_private_key"], rsa_private_key);
-
-        // decrypt aes_key_base64_encrypted with rsa_public_key
-        // const auto aes_key_base64 = rsa_2048::decrypt(aes_key_base64_encrypted, rsa_private_key);
-        // std::cout << "aes_key_base64 decrypted: \"" << aes_key_base64 << "\"" << std::endl;
+        create_shared_aes_key_for_them(aes_key_base64, at_key.shared_with);
 
         // 2. encrypt value with aes_key_base64
         const auto encrypted_value = aes_ctr::encrypt(value, aes_key_base64);
         std::cout << "encrypted_value: \"" << encrypted_value << "\"" << std::endl;
 
         // 3. update:@alice:phone@bob 444121212[encrypted]
-        command = "update:" + at_key.shared_with->get_value() + ":" + at_key.key + at_key.shared_by->get_value() + " " + encrypted_value;
+        command = "update:" + at_key.shared_with->get_value() + ":" + at_key.key;
+        if(!at_key.namespace_str.empty())
+        {
+            command = command + at_key.namespace_str;
+
+        }
+        command = command + at_key.shared_by->get_value() + " " + encrypted_value;
     }
     else if (at_key.metadata->is_public != nullptr && *at_key.metadata->is_public)
     {
         // public key (update:public:phone@bob 444121212)
-        command = "update:public:" + at_key.key + at_key.shared_by->get_value() + " " + value;
+        command = "update:public:" + at_key.key;
+        if(!at_key.namespace_str.empty())
+        {
+            command = command + "." + at_key.namespace_str;
+        }
+        command = command + at_key.shared_by->get_value() + " " + value;
     }
     else
     {
         // self key (update:phone@bob 444121212)
-        command = "update:" + at_key.key + at_key.shared_by->get_value() + " " + value;
+        command = "update:" + at_key.key;
+        if(!at_key.namespace_str.empty())
+        {
+            command = command + "." + at_key.namespace_str;
+        }
+        command = command + at_key.shared_by->get_value() + " " + value;
     }
 
     std::cout << "command: \"" << command << "\"" << std::endl;
@@ -178,17 +224,34 @@ void AtClient::delete_ak(const AtKey &at_key)
     if (at_key.metadata->is_public != nullptr && *at_key.metadata->is_public)
     {
         // public key (delete:public:phone@bob)
-        command = "delete:public:" + at_key.key + at_key.shared_by->get_value();
+        command = "delete:public:" + at_key.key;
+        if(!at_key.namespace_str.empty())
+        {
+            command = command + "." + at_key.namespace_str;
+        }
+        command = command + at_key.shared_by->get_value();
     }
     else if (at_key.shared_with != nullptr)
     {
         // shared key (delete:@alice:phone@bob)
-        command = "delete:" + at_key.shared_with->get_value() + ":" + at_key.key + at_key.shared_by->get_value();
+        command = "delete:" + at_key.shared_with->get_value() + ":" + at_key.key ;
+
+        if(!at_key.namespace_str.empty())
+        {
+            command = command + "." + at_key.namespace_str;
+        }
+        
+        command = command + at_key.shared_by->get_value();
     }
     else
     {
         // self key (delete:phone@bob)
-        command = "delete:" + at_key.key + at_key.shared_by->get_value();
+        command = "delete:" + at_key.key;
+        if(!at_key.namespace_str.empty())
+        {
+            command = command + "." + at_key.namespace_str;
+        }
+        command = command + at_key.shared_by->get_value();
     }
     std::string response = execute_command(command);
     std::cout << "response: \"" << response << "\"" << std::endl;
