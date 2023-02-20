@@ -6,7 +6,7 @@ void read_data()
     const AtSign esp = AtSign("@soccer0");
     std::map<std::string, std::string> keys = keys_reader::read_keys(esp);
     AtClient *at_client = new AtClient(esp, keys);
-    at_client->pkam_authenticate();
+    at_client->pkam_authenticate("ssid", "password");
 
     const auto java = AtSign("@22easy");
     const auto at_key = AtKey("test_esp", &java, &esp);
@@ -23,7 +23,7 @@ void send_data()
     const AtSign esp = AtSign("@soccer0");
     std::map<std::string, std::string> keys = keys_reader::read_keys(esp);
     AtClient *at_client = new AtClient(esp, keys);
-    at_client->pkam_authenticate();
+    at_client->pkam_authenticate("ssid", "password");
 
     const auto java = AtSign("@tastelessbanana");
     const auto at_key = AtKey("test_esp32", &esp, &java);
