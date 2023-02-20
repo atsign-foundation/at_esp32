@@ -47,17 +47,22 @@ void rsa_2048_sha_256_verify_example()
     // WIP
 }
 
+// given a rsa public key encoded in base64, encrypt a string of text
 void rsa_2048_encrypt_example()
 {
+    // 1. initialize rsa public key encoded in base64 in a std::string
     const auto encrypt_public_key_encrypted = std::string{"JXPlzxPjGC4MKKvaamKqUKJXPN3at5pqHqQ929BtQdirszui5PDkMT4SPj1c2sQOekz0PdDnzMTg1k4Aald73yGEI/i6gPnCElCK7m+M3j4MnceMy6kXgcKDDAvHbvArs52l9nX00JQ71+kRrE+2KTe7KNBjls2gRWdjPZgnFEnqodAp2Wy22BhTAWr9UKnR63m2GKrfLXL7TfrNcQ3O1nJZbNrnLlLMVkZsXMTNgRDp7s02PR0/3WA96pEA86uKAWlAyhyDE15FQg/YT/Y+gcsyENNJ1jB6/XphYlSNtTMsEnM2J63/xJcvwMNwtOrQopizloOoMNmG6vxi+4EJDYZHL6R2ttBxKSKg+SdDGy0AIcbE/h9RnKhRSCqjkwB9vrlx9//0yIoYeyj0qt7fj0Y5jGW4nK6e4WioNx8MFWAC1z/TNvJ3dKdMbCuB3dkgpaec+mFkd1YwZKvwqNRfGxVbNkLl+CkThhSbJyxVj3LN9MBuBkSOMWsv2o8uWeXcopaJDmnRmXCYbBJGD4M2pg=="};
 
+    // 2. it's encrypted, so let's decrypt it with our aes key
     const auto self_key = std::string{"YPcm2YWL0KXyRvjJxn32fJ7U3/9Zjyg6rdMl4xNMY8Y="};
 
     const auto encrypt_public_key_decrypted = aes_ctr::decrypt(encrypt_public_key_encrypted, self_key);
 
+    // 3. now that we've decrypted it, we can put it inside of a rsa_2048::public_key struct
     rsa_2048::public_key encrypt_public_key;
     rsa_2048::populate(encrypt_public_key_decrypted, encrypt_public_key);
 
+    // 4. now we can encrypt a string of text
     const auto cipher_text_base64 = rsa_2048::encrypt("Hello World", encrypt_public_key);
 
     std::cout << cipher_text_base64 << std::endl;
