@@ -25,5 +25,3 @@ void decrypt_sample()
 	
     std::cout << decrypted << std::endl;
 }
-
-void loop() {};
