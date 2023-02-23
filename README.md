@@ -26,8 +26,40 @@ monitor_speed = 115200
 
 ## Getting Started
 
-(WIP)
+### 1. Prerequisites
 
+1. Install [VSCode](https://code.visualstudio.com/download) and the [PlatformIO VSCode extension](https://platformio.org/install/ide?install=vscode).
+2. Get your [atSign](https://my.atsign.com/go) and its `.atKeys` file. Follow this [video](https://youtu.be/8xJnbsuF4C8) to get your free atSign and generate its `.atKeys` file. 
+3. You will need an [ESP32](https://www.espressif.com/en/products/modules/esp32) and a USB-A to micro-USB cable to connect it to your computer.
+
+### 2. Setting up your Project
+
+1. Open VSCode and install the PlatformIO VScode extension. You will use this extension to interact with the ESP32.
+2. Go to the PlatformIO Home (if you lost it just open the command palette via Ctrl/Cmd + Shift + P and search and run the `PlatformIO: Home` command).
+3. Install the `Espressif32` platform by clicking on the `Platforms` > `Embedded` tab and searching for `Espressif32` and clicking on the `Install` button.
+4. Next, go to `Projects` and press `+ Create New Project`. Give a name to your project, select the `Espressif ESP32 Dev Module` board, and select the "Arduino" framework. Select a location for your project and click "Finish."
+5. Go back to the PlatformIO Home and click on the `Libraries` tab. Search for `at_client` by JeremyTubongbanua and click on the `Install` button. This will install the `at_client` library in your project. Do the same for the `ArduinoJson` library by Benoit Blanchon.
+
+### 3. Uploading your `.atKeys`
+
+1. Create a folder called `data` in the root of your project.
+2. Copy your `.atKeys` file into the `data` folder. The file should be in the data folder like `data/@bob_key.atKeys`
+3. Put your ESP32 into download mde by holding down the `BOOT` button and pressing the `RESET` button while still holding the `BOOT` button. It should be in download mode as long as you are holding `BOOT` down.
+4. While it is in download mode, run the "Upload File System Image" command. This can be seen under Project Tasks > Platform usually on top of where your file explorer is on VSCode. If you don't see your project tasks, you can open the command palette via Ctrl/Cmd + Shift + P and search and run the `Project Tasks` and try run the `Explorer:` and `PlatformIO:` recommended commands.
+5. Hopefully you get a [SUCCESS]. If you don't, make sure you are using a **data** USB-A to Micro USB cable (yes some cables don't transmit data). Also make sure the ESP32 is plugged in :) (it's happened before).
+
+### 4. Building and Uploading your Project
+
+1. Open the `main.cpp` file in the `src` folder and add the following headers:
+
+```cpp
+#include <WiFiClientSecure.h>
+#include <SPIFFS.h>
+#include "at_client.h"
+```
+
+2. Run "Build" under "Project Tasks." If you don't see your project tasks, open the command palette via Ctrl/Cmd + Shift + P and search and run the `Project Tasks` and try run the `Explorer:` and `PlatformIO:` recommended commands.
+3. Hopefully you get a [SUCCESS].
 ## Resources
 
 Core assets used in this project:
