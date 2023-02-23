@@ -155,9 +155,12 @@ std::string AtClient::get_ak(const AtKey &at_key)
     else
     {
         // self key (llookup:key@me)
-        const auto command = "llookup" + at_key.key + at_sign.get_value();
+        const auto command = "llookup:" + at_key.key + at_sign.get_value();
+        std::cout << "command: \"" << command << "\"" << std::endl;
 
-        data = execute_command(command);
+        const auto encrypted_value = execute_command(command);
+
+        data = aes_ctr::decrypt(encrypted_value, keys["self_encryption_key"]);
     }
 
     return data;
@@ -210,7 +213,10 @@ void AtClient::put_ak(const AtKey &at_key, const std::string &value)
         {
             command = command + "." + at_key.namespace_str;
         }
-        command = command + at_key.shared_by->get_value() + " " + value;
+        // encrypt value with our aes self key
+        const auto encrypted_value = aes_ctr::encrypt(value, keys["self_encryption_key"]);
+
+        command = command + at_key.shared_by->get_value() + " " + encrypted_value;
     }
 
     std::cout << "command: \"" << command << "\"" << std::endl;
