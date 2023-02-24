@@ -29,8 +29,8 @@ monitor_speed = 115200
 ### 1. Prerequisites
 
 1. Install [VSCode](https://code.visualstudio.com/download) and the [PlatformIO VSCode extension](https://platformio.org/install/ide?install=vscode).
-2. Get your [atSign](https://my.atsign.com/go) and its `.atKeys` file. Follow this [video](https://youtu.be/8xJnbsuF4C8) to get your free atSign and generate its `.atKeys` file. 
-3. You will need an [ESP32](https://www.espressif.com/en/products/modules/esp32) and a USB-A to micro-USB cable to connect it to your computer.
+2. Get 2 [atSigns](https://my.atsign.com/go) and their `.atKeys` files. Follow this [video](https://youtu.be/8xJnbsuF4C8) to get your free atSign and generate its `.atKeys` file. 
+3. You will need an [ESP32](https://www.espressif.com/en/products/modules/esp32) and a USB-A to micro-USB cable data cable to connect it to your computer.
 
 ### 2. Setting up your Project
 
@@ -39,6 +39,11 @@ monitor_speed = 115200
 3. Install the `Espressif32` platform by clicking on the `Platforms` > `Embedded` tab and searching for `Espressif32` and clicking on the `Install` button.
 4. Next, go to `Projects` and press `+ Create New Project`. Give a name to your project, select the `Espressif ESP32 Dev Module` board, and select the "Arduino" framework. Select a location for your project and click "Finish."
 5. Go back to the PlatformIO Home and click on the `Libraries` tab. Search for `at_client` by JeremyTubongbanua and click on the `Install` button. This will install the `at_client` library in your project. Do the same for the `ArduinoJson` library by Benoit Blanchon.
+6. Go to `platform.ini` and add the following line:
+
+```ini
+monitor_speed = 115200
+```
 
 ### 3. Uploading your `.atKeys`
 
