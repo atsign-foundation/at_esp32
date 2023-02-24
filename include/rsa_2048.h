@@ -40,6 +40,16 @@ namespace rsa_2048
 
     // WIP
     std::string verify(const std::string &signature, const public_key &public_key_base64);
+
+    /// @brief encrypt a string of text given an rsa 2048 public key struct
+    /// @param plain_text the plain text to encrypt
+    /// @param public_key_base64 the public key struct populated with the n and e values
+    /// @return the base64 encoded cipher text
     std::string encrypt(const std::string &plain_text, const public_key &public_key_base64);
+
+    /// @brief decrypt a string of text given an rsa 2048 private key struct
+    /// @param cipher_text_base64 the base64 encoded cipher text to decrypt
+    /// @param private_key_base64 the private key struct populated with the n, e, d, p, q values
+    /// @return the plain text
     std::string decrypt(const std::string &cipher_text_base64, const private_key &private_key_base64);
 };
