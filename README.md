@@ -59,7 +59,85 @@ monitor_speed = 115200
 ```
 
 2. Run "Build" under "Project Tasks." If you don't see your project tasks, open the command palette via Ctrl/Cmd + Shift + P and search and run the `Project Tasks` and try run the `Explorer:` and `PlatformIO:` recommended commands.
+
 3. Hopefully you get a [SUCCESS].
+
+4. Now let's upload our project to the ESP32. First, put the ESP32 into download mode by holding down the `BOOT` button and pressing the `RESET` button while still holding the `BOOT` button. It should be in download mode as long as you are holding `BOOT` down. Run "Upload and Monitor" under "Project Tasks." If you don't see your project tasks, open the command palette via Ctrl/Cmd + Shift + P and search and run the `Project Tasks` and try run the `Explorer:` and `PlatformIO:` recommended commands.
+
+### 5. Pkam Authentication
+
+1. Recall that each atSign has its own personal server known as an "atServer." You can just think of this as a key-value database but with a lot more features. The atServer speaks the atProtocol between clients and other atServers. Now let's write some code to allow our ESP32 to authenticate into its atServer so it can run operations.
+
+2. First let's create a `constants.h` header file under the `include/` folder in our project. Let's define our WiFi SSID and Password. This can be your home WiFi or your own personal hotspot. Depending on your school, this may not work on your school WiFi.
+
+```cpp
+// constants.h
+
+#pragma once
+
+#define SSID "******"
+#define PASSWORD "******"
+```
+
+3. Now let's include this header file into our `main.cpp` by including it like this:
+
+```cpp
+/// ...
+#include "constants.h"
+/// ...
+```
+
+4. Now let's add our pkam authentication code under the `void setup() {}` function like so:
+
+```cpp
+
+void setup()
+{
+    // put your setup code here, to run once:
+
+    // change this to the atSign you own and have the keys to
+    const auto *at_sign = new AtSign("@24glad32"); 
+    
+    // reads the keys on the ESP32
+    const auto keys = keys_reader::read_keys(*at_sign); 
+    
+    // creates the AtClient object (allows us to run operations)
+    auto *at_client = new AtClient(*at_sign, keys);  
+    
+    // pkam authenticate into our atServer
+    at_client->pkam_authenticate(SSID, PASSWORD); 
+}
+```
+
+5. Now put the ESP32 into download mode and upload and monitor your project.
+
+6. Your output should be similar to the snippet below. If it is not, ensure that the `.atKeys` are uploaded and that you are using the correct SSID and Password. It may take a few attempts to get it to work (perhaps due to weak connection). For Tyler, it took a few attempts to get it to work. 
+
+```sh
+Attempting to connect to Soup...
+..
+Connected!
+IP address: 2113972416
+Connected to root.atsign.org:64
+ ce749e70-f570-5486-9f86-eb9ec5e038d8.swarm0002.atsign.zone:5604
+res: " ce749e70-f570-5486-9f86-eb9ec5e038d8.swarm0002.atsign.zone:5604"
+Connected to ce749e70-f570-5486-9f86-eb9ec5e038d8.swarm0002.atsign.zone:5604
+first: "@data:["publickey@24glad32","signing_publickey@24glad32"]"
+Secondary connected: 1
+challenge: "_def2da36-4c10-4b0e-97c1-f09c314637c2@24glad32:44fc42a6-774e-4bb8-bd6a-90d4c58b590a"
+import: 0
+complete: 0
+private key check: 0
+sign success: 0
+pkam command: "pkam:VVw2RNcwhNw/l7vLLeC10VqNU2xqfUtjf7T82PvoxQ+uaN6QW9zj8Pi4+b8UgUNu6G8L1RkdmU2UMCkWrB/L0v2Jh1oK7eHth8PN4B91F/4rtxd1AGkfV+aiX5IyRLBC8prl5qdcqKqf3Gt6XCSV4/NDCOrXQqXdd/njZ/gmCLJlyPPlSu6IkOzMxu2nAcwNe7daSFw1agcyLLyhjdl3oJOopxGFX3zRar3vnex5F71A/1BIyP0h5OjZ0ZItngWaujMxEwwyvMINQJa0nflwk7z6phP+Vnt+7+oKNQCDhRfUTDaWHm4t++2Mp6BrHDh5KPCFCK9psgFGu+tx8nvpjg=="
+response: success
+authenticated: 1
+```
+
+### 6. Sending Data
+
+### 7. Receiving Data
+
 ## Resources
 
 Core assets used in this project:
