@@ -29,8 +29,8 @@ monitor_speed = 115200
 ### 1. Prerequisites
 
 1. Install [VSCode](https://code.visualstudio.com/download) and the [PlatformIO VSCode extension](https://platformio.org/install/ide?install=vscode).
-2. Get your [atSign](https://my.atsign.com/go) and its `.atKeys` file. Follow this [video](https://youtu.be/8xJnbsuF4C8) to get your free atSign and generate its `.atKeys` file. 
-3. You will need an [ESP32](https://www.espressif.com/en/products/modules/esp32) and a USB-A to micro-USB cable to connect it to your computer.
+2. Get 2 [atSigns](https://my.atsign.com/go) and their `.atKeys` files. Follow this [video](https://youtu.be/8xJnbsuF4C8) to get your free atSign and generate its `.atKeys` file. 
+3. You will need an [ESP32](https://www.espressif.com/en/products/modules/esp32) and a USB-A to micro-USB cable data cable to connect it to your computer.
 
 ### 2. Setting up your Project
 
@@ -39,6 +39,11 @@ monitor_speed = 115200
 3. Install the `Espressif32` platform by clicking on the `Platforms` > `Embedded` tab and searching for `Espressif32` and clicking on the `Install` button.
 4. Next, go to `Projects` and press `+ Create New Project`. Give a name to your project, select the `Espressif ESP32 Dev Module` board, and select the "Arduino" framework. Select a location for your project and click "Finish."
 5. Go back to the PlatformIO Home and click on the `Libraries` tab. Search for `at_client` by JeremyTubongbanua and click on the `Install` button. This will install the `at_client` library in your project. Do the same for the `ArduinoJson` library by Benoit Blanchon.
+6. Go to `platform.ini` and add the following line:
+
+```ini
+monitor_speed = 115200
+```
 
 ### 3. Uploading your `.atKeys`
 
@@ -137,6 +142,102 @@ authenticated: 1
 ### 6. Sending Data
 
 ### 7. Receiving Data
+
+In this step, your ESP32 will be receiving data sent by the application. 
+
+1. Before moving on, make sure you have successfully completed steps 1-5. 
+
+2. Make sure that your application has sent data to the ESP32. Take note of the atSigns and the key name.
+
+Sample java code:
+
+```java
+package com.example;
+
+import org.atsign.client.api.AtClient;
+import org.atsign.client.util.EncryptionUtil;
+import org.atsign.common.AtSign;
+import org.atsign.common.KeyBuilders;
+import org.atsign.common.Keys.AtKey;
+import org.atsign.common.Keys.SharedKey;
+
+/**
+ * Hello world!
+ *
+ */
+public class App {
+    public static void main(String[] args) throws Exception {
+        AtSign java = new AtSign("@driving433");
+        AtSign esp32 = new AtSign("@icy761");
+
+
+        AtClient atClient = AtClient.withRemoteSecondary("root.atsign.org:64", java, false);
+
+        // SharedKey sharedKey = new KeyBuilders.SharedKeyBuilder(java, esp32).key("initialization").build();
+        // String value = "hello there";
+
+        // String ret = atClient.put(sharedKey, value).get();
+        // System.out.println(ret);
+
+        SharedKey sharedKey1 = new KeyBuilders.SharedKeyBuilder(esp32, java).key("test").build();
+        String value1 = atClient.get(sharedKey1).get();
+
+        System.out.println(value1);
+    }
+}
+
+```
+
+3. Create a `constants.h` under the `include/` directory. This file will contain your constants. Change them according to your WiFi SSID and Password.
+
+```cpp
+#pragma once
+
+#define SSID "****"
+#define PASSWORD "****"
+```
+
+4. Run the following code in `main.cpp`. Change your ESP32 atSign, Java atSign, key name, and optionally the value accordingly.
+
+```cpp
+#include <Arduino.h>
+#include <WiFiClientSecure.h>
+#include <SPIFFS.h>
+#include "at_client.h"
+
+#include "constants.h"
+
+void setup()
+{
+	// put your setup code here, to run once:
+
+    // change this to the atSign you own and have the keys to
+    const auto *esp32 = new AtSign("@esp"); 
+	const auto *java = new AtSign("@java");
+    
+    // reads the keys on the ESP32
+    const auto keys = keys_reader::read_keys(*esp32); 
+    
+    // creates the AtClient object (allows us to run operations)
+    auto *at_client = new AtClient(*esp32, keys);  
+    
+    // pkam authenticate into our atServer
+    at_client->pkam_authenticate(SSID, PASSWORD); 
+
+	// key name is "test", 
+	// sharedBy (creator) esp32 (@icy761), 
+	// sharedWith java (@driving433)
+	const auto *at_key = new AtKey("test", esp32, java); 
+
+	const auto value = std::string{"Hello World!"};
+
+	at_client->put_ak(*at_key, value);
+}
+
+void loop()
+{
+}
+```
 
 ## Resources
 
