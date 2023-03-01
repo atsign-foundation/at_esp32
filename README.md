@@ -141,6 +141,108 @@ authenticated: 1
 
 ### 6. Sending Data
 
+In this step, your ESP32 will be sending data to the application.
+
+1. Before moving on, make sure you have successfully completed steps 1-5.
+
+2. Make sure that your application has send data to the ESP32 at least once before moving on.
+
+```java
+package com.example;
+
+import org.atsign.client.api.AtClient;
+import org.atsign.common.AtException;
+import org.atsign.common.AtSign;
+import org.atsign.common.KeyBuilders;
+import org.atsign.common.Keys.SharedKey;
+
+public class App {
+    public static void main(String[] args) throws Exception {
+        AtSign java = new AtSign("@driving433");
+        AtSign esp32 = new AtSign("@icy761");
+        AtClient atClient = AtClient.withRemoteSecondary("root.atsign.org:64", java);
+
+        // sending initial "handshake"
+        SharedKey initialKey = new KeyBuilders.SharedKeyBuilder(atSign, esp32).key("test").build();
+
+        String response = atClient.put(initialKey, "Hello World!").get();
+        System.out.println("Response: " + response);
+    }
+}
+```
+
+3. Back to ESP32 code, create a `constants.h` under the `include/` folder and populate it with your SSID and PASSWORD.
+
+```h
+#pragma once
+
+#define SSID "****"
+#define PASSWORD "****"
+```
+
+4. Now let's code the `main.cpp` file. Copy the following code under `void setup() {}` and change constants accordingly to your project.
+
+```cpp
+#include <Arduino.h>
+#include <WiFiClientSecure.h>
+#include <SPIFFS.h>
+#include "at_client.h"
+
+#include "constants.h"
+
+void setup()
+{
+	// put your setup code here, to run once:
+
+    // change this to the atSign you own and have the keys to
+    const auto *at_sign = new AtSign("@esp"); 
+	const auto *java = new AtSign("@java");
+    
+    // reads the keys on the ESP32
+    const auto keys = keys_reader::read_keys(*at_sign); 
+    
+    // creates the AtClient object (allows us to run operations)
+    auto *at_client = new AtClient(*at_sign, keys);  
+    
+    // pkam authenticate into our atServer
+    at_client->pkam_authenticate(SSID, PASSWORD); 
+
+	const auto *at_key = new AtKey("test", at_sign, java);
+
+	at_client->put_ak(*at_key, "Hello World Lemonade!");
+}
+
+void loop()
+{
+	// put your main code here, to run repeatedly:
+}
+```
+
+5. Receive the data on the app side (Java example):
+
+```java
+package com.example;
+
+import org.atsign.client.api.AtClient;
+import org.atsign.common.AtSign;
+import org.atsign.common.KeyBuilders;
+import org.atsign.common.Keys.SharedKey;
+
+public class App {
+    public static void main(String[] args) throws Exception {
+        AtSign java = new AtSign("@driving433");
+        AtSign esp32 = new AtSign("@icy761");
+        AtClient atClient = AtClient.withRemoteSecondary("root.atsign.org:64", java);
+
+        SharedKey sharedKey = new KeyBuilders.SharedKeyBuilder(esp32, java).key("test").build();
+
+        String data = atClient.get(sharedKey).get();
+        System.out.println("Data: " + data);
+    }
+}
+
+```
+
 ### 7. Receiving Data
 
 In this step, your ESP32 will be receiving data sent by the application. 
