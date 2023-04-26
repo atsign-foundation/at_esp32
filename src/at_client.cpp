@@ -80,7 +80,6 @@ std::string AtClient::get_aes_key_shared_by_them(const AtSign *at_sign_shared_by
 
     // decrypt aes_key_base64_encrypted with rsa_public_key
     const auto aes_key_base64 = rsa_2048::decrypt(aes_key_base64_encrypted, rsa_private_key);
-    std::cout << "aes_key_base64 decrypted: \"" << aes_key_base64 << "\"" << std::endl;
 
     return aes_key_base64;
 }
@@ -94,7 +93,6 @@ std::string AtClient::get_aes_key_shared_by_me(const AtSign *at_sign_shared_with
 
     // decrypt aes_key_base64_encrypted with rsa_public_key
     const auto aes_key_base64 = rsa_2048::decrypt(aes_key_base64_encrypted, rsa_private_key);
-    std::cout << "aes_key_base64 decrypted: \"" << aes_key_base64 << "\"" << std::endl;
 
     return aes_key_base64;
 }
@@ -190,7 +188,7 @@ void AtClient::put_ak(const AtKey &at_key, const std::string &value)
         command = "update:" + at_key.shared_with->get_value() + ":" + at_key.key;
         if(!at_key.namespace_str.empty())
         {
-            command = command + at_key.namespace_str;
+            command = command + "." + at_key.namespace_str;
 
         }
         command = command + at_key.shared_by->get_value() + " " + encrypted_value;
