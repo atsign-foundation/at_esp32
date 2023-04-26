@@ -86,7 +86,7 @@ class AtKey
 
 public:
     const std::string key;
-    const std::string namespace_str;
+    std::string namespace_str;
     const AtSign *shared_by; // the atSign that this key is sharedBy (creator)
     const AtSign *shared_with; // the atSign that this key is sharedWith (could be nullptr)
     Metadata *metadata;
