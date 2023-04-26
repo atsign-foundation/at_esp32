@@ -94,7 +94,6 @@ std::string AtClient::get_aes_key_shared_by_me(const AtSign *at_sign_shared_with
 
     // decrypt aes_key_base64_encrypted with rsa_public_key
     const auto aes_key_base64 = rsa_2048::decrypt(aes_key_base64_encrypted, rsa_private_key);
-    std::cout << "aes_key_base64 decrypted: \"" << aes_key_base64 << "\"" << std::endl;
 
     return aes_key_base64;
 }
