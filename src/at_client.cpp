@@ -188,7 +188,7 @@ void AtClient::put_ak(const AtKey &at_key, const std::string &value)
         command = "update:" + at_key.shared_with->get_value() + ":" + at_key.key;
         if(!at_key.namespace_str.empty())
         {
-            command = command + at_key.namespace_str;
+            command = command + "." + at_key.namespace_str;
 
         }
         command = command + at_key.shared_by->get_value() + " " + encrypted_value;

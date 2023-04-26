@@ -108,7 +108,7 @@ public:
             s += shared_with->get_value() + ":";
         }
         s += key;
-        if (namespace_str.empty())
+        if (!namespace_str.empty())
         {
             s += "." + namespace_str;
         }
