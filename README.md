@@ -1,6 +1,7 @@
 <img width=250px src="https://atsign.dev/assets/img/atPlatform_logo_gray.svg?sanitize=true">
 
 <a href="https://registry.platformio.org/libraries/jeremytubongbanua/at_client"><img src="https://badges.registry.platformio.org/packages/jeremytubongbanua/library/at_client.svg" alt="PlatformIO Registry" /></a>
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/atsign-foundation/at_esp32/badge)](https://api.securityscorecards.dev/projects/github.com/atsign-foundation/at_esp32)
 
 # at_esp32
 
