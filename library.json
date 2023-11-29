@@ -1,6 +1,6 @@
 {
     "name": "at_client",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "description": "atPlatform implementation in the ESP32 (Arduino C++)",
     "keywords": "encryption, aes256ctr, aesctr, aes, aes256, rsa, rsa2048, privacy, platform, framework",
     "repository": {
