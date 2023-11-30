@@ -1,3 +1,7 @@
+## v0.2.6
+
+- Cppcheck workflow
+
 ## v0.2.5
 
 - OSSF Scorecard
