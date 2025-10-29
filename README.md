@@ -31,7 +31,7 @@ monitor_speed = 115200
 ### 1. Prerequisites
 
 1. Install [VSCode](https://code.visualstudio.com/download) and the [PlatformIO VSCode extension](https://platformio.org/install/ide?install=vscode).
-2. Get 2 [atSigns](https://my.atsign.com/go) and their `.atKeys` files. Follow this [video](https://youtu.be/8xJnbsuF4C8) to get your free atSign and generate its `.atKeys` file. 
+2. Get 2 [atSigns](https://my.atsign.com/go) and their `.atKeys` files. Follow this [video](https://youtu.be/8xJnbsuF4C8) to get your free atSign and generate its `.atKeys` file.
 3. You will need an [ESP32](https://www.espressif.com/en/products/modules/esp32) and a USB-A to micro-USB cable data cable to connect it to your computer.
 
 ### 2. Setting up your Project
@@ -118,7 +118,7 @@ void setup()
 
 5. Now put the ESP32 into download mode and upload and monitor your project.
 
-6. Your output should be similar to the snippet below. If it is not, ensure that the `.atKeys` are uploaded and that you are using the correct SSID and Password. It may take a few attempts to get it to work (perhaps due to weak connection). For Tyler, it took a few attempts to get it to work. 
+6. Your output should be similar to the snippet below. If it is not, ensure that the `.atKeys` are uploaded and that you are using the correct SSID and Password. It may take a few attempts to get it to work (perhaps due to weak connection). For Tyler, it took a few attempts to get it to work.
 
 ```sh
 Attempting to connect to Soup...
@@ -140,6 +140,18 @@ pkam command: "pkam:VVw2RNcwhNw/l7vLLeC10VqNU2xqfUtjf7T82PvoxQ+uaN6QW9zj8Pi4+b8U
 response: success
 authenticated: 1
 ```
+
+ Note : if you're getting an error like this
+>`[  4824][E][ssl_client.cpp:37]_handle_error(): [start_ssl_client():273]: (-9984)``X509 - Certificate verification failed, e.g. CRL, CA or signature check failed`
+`[  4838][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -9984`
+
+Clone the Repository, open your terminal and type
+
+ ```bash
+ openssl s_client -showcerts -connect root.atsign.org:64 
+ ```
+
+change the hard coded cert to a fresh one in `src/at_root_connection.cpp` and `src/at_root_secondary_connection.cpp`
 
 ### 6. Sending Data
 
@@ -194,11 +206,11 @@ public class App {
 
 void setup()
 {
-	// put your setup code here, to run once:
+ // put your setup code here, to run once:
 
     // change this to the atSign you own and have the keys to
     const auto *at_sign = new AtSign("@esp"); 
-	const auto *java = new AtSign("@java");
+ const auto *java = new AtSign("@java");
     
     // reads the keys on the ESP32
     const auto keys = keys_reader::read_keys(*at_sign); 
@@ -209,14 +221,14 @@ void setup()
     // pkam authenticate into our atServer
     at_client->pkam_authenticate(SSID, PASSWORD); 
 
-	const auto *at_key = new AtKey("test", at_sign, java);
+ const auto *at_key = new AtKey("test", at_sign, java);
 
-	at_client->put_ak(*at_key, "Hello World Lemonade!");
+ at_client->put_ak(*at_key, "Hello World Lemonade!");
 }
 
 void loop()
 {
-	// put your main code here, to run repeatedly:
+ // put your main code here, to run repeatedly:
 }
 ```
 
@@ -247,9 +259,9 @@ public class App {
 
 ### 7. Receiving Data
 
-In this step, your ESP32 will be receiving data sent by the application. 
+In this step, your ESP32 will be receiving data sent by the application.
 
-1. Before moving on, make sure you have successfully completed steps 1-5. 
+1. Before moving on, make sure you have successfully completed steps 1-5.
 
 2. Make sure that your application has sent data to the ESP32. Take note of the atSigns and the key name.
 
@@ -313,11 +325,11 @@ public class App {
 
 void setup()
 {
-	// put your setup code here, to run once:
+ // put your setup code here, to run once:
 
     // change this to the atSign you own and have the keys to
     const auto *esp32 = new AtSign("@esp"); 
-	const auto *java = new AtSign("@java");
+ const auto *java = new AtSign("@java");
     
     // reads the keys on the ESP32
     const auto keys = keys_reader::read_keys(*esp32); 
@@ -328,14 +340,14 @@ void setup()
     // pkam authenticate into our atServer
     at_client->pkam_authenticate(SSID, PASSWORD); 
 
-	// key name is "test", 
-	// sharedBy (creator) esp32 (@icy761), 
-	// sharedWith java (@driving433)
-	const auto *at_key = new AtKey("test", esp32, java); 
+ // key name is "test", 
+ // sharedBy (creator) esp32 (@icy761), 
+ // sharedWith java (@driving433)
+ const auto *at_key = new AtKey("test", esp32, java); 
 
-	const auto value = std::string{"Hello World!"};
+ const auto value = std::string{"Hello World!"};
 
-	at_client->put_ak(*at_key, value);
+ at_client->put_ak(*at_key, value);
 }
 
 void loop()
@@ -370,7 +382,7 @@ pio project init
 
 4. Create a `main.cpp` file in the `src` folder and add the following code:
 
-This will allow you to compile the code. 
+This will allow you to compile the code.
 
 ```cpp
 void setup() {};
