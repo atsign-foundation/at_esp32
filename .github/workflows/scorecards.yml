@@ -14,8 +14,15 @@ on:
   push:
     branches: [ "trunk" ]
 
-# Declare default permissions as read only.
-permissions: read-all
+permissions:
+  # Required when publishing results (badge / API / code scanning)
+  security-events: write
+  id-token: write
+  # Recommended reads to avoid GraphQL/SAST gaps
+  contents: read
+  issues: read
+  pull-requests: read
+  checks: read
 
 jobs:
   analysis:
