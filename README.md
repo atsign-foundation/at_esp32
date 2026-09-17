@@ -6,6 +6,12 @@
 
 # at_esp32
 
+This repository is archived as of September 17, 2026. Please refer to [at_client_arduino](https://github.com/atsign-foundation/at_client_Arduino) for developing an AtClient on ESP32s.
+
+The old YouTube playlist is unlisted, but still accessible at: [https://www.youtube.com/playlist?list=PLkZCny-S3rfC93_Xqd_HBkK_dAjDzQ9Et](https://www.youtube.com/playlist?list=PLkZCny-S3rfC93_Xqd_HBkK_dAjDzQ9Et).
+
+--
+
 ESP32 C++ (Arduino framework) implementation of the atPlatform.
 
 ## Installation
@@ -21,7 +27,7 @@ Setup your `platform.ini` similar to:
 platform = espressif32
 board = esp32dev
 framework = arduino
-lib_deps = 
+lib_deps =
     jeremytubongbanua/at_client@^0.2.4
 monitor_speed = 115200
 ```
@@ -103,16 +109,16 @@ void setup()
     // put your setup code here, to run once:
 
     // change this to the atSign you own and have the keys to
-    const auto *at_sign = new AtSign("@24glad32"); 
-    
+    const auto *at_sign = new AtSign("@24glad32");
+
     // reads the keys on the ESP32
-    const auto keys = keys_reader::read_keys(*at_sign); 
-    
+    const auto keys = keys_reader::read_keys(*at_sign);
+
     // creates the AtClient object (allows us to run operations)
-    auto *at_client = new AtClient(*at_sign, keys);  
-    
+    auto *at_client = new AtClient(*at_sign, keys);
+
     // pkam authenticate into our atServer
-    at_client->pkam_authenticate(SSID, PASSWORD); 
+    at_client->pkam_authenticate(SSID, PASSWORD);
 }
 ```
 
@@ -148,7 +154,7 @@ authenticated: 1
 Clone the Repository, open your terminal and type
 
  ```bash
- openssl s_client -showcerts -connect root.atsign.org:64 
+ openssl s_client -showcerts -connect root.atsign.org:64
  ```
 
 change the hard coded cert to a fresh one in `src/at_root_connection.cpp` and `src/at_root_secondary_connection.cpp`
@@ -209,17 +215,17 @@ void setup()
  // put your setup code here, to run once:
 
     // change this to the atSign you own and have the keys to
-    const auto *at_sign = new AtSign("@esp"); 
+    const auto *at_sign = new AtSign("@esp");
  const auto *java = new AtSign("@java");
-    
+
     // reads the keys on the ESP32
-    const auto keys = keys_reader::read_keys(*at_sign); 
-    
+    const auto keys = keys_reader::read_keys(*at_sign);
+
     // creates the AtClient object (allows us to run operations)
-    auto *at_client = new AtClient(*at_sign, keys);  
-    
+    auto *at_client = new AtClient(*at_sign, keys);
+
     // pkam authenticate into our atServer
-    at_client->pkam_authenticate(SSID, PASSWORD); 
+    at_client->pkam_authenticate(SSID, PASSWORD);
 
  const auto *at_key = new AtKey("test", at_sign, java);
 
@@ -328,22 +334,22 @@ void setup()
  // put your setup code here, to run once:
 
     // change this to the atSign you own and have the keys to
-    const auto *esp32 = new AtSign("@esp"); 
+    const auto *esp32 = new AtSign("@esp");
  const auto *java = new AtSign("@java");
-    
-    // reads the keys on the ESP32
-    const auto keys = keys_reader::read_keys(*esp32); 
-    
-    // creates the AtClient object (allows us to run operations)
-    auto *at_client = new AtClient(*esp32, keys);  
-    
-    // pkam authenticate into our atServer
-    at_client->pkam_authenticate(SSID, PASSWORD); 
 
- // key name is "test", 
- // sharedBy (creator) esp32 (@icy761), 
+    // reads the keys on the ESP32
+    const auto keys = keys_reader::read_keys(*esp32);
+
+    // creates the AtClient object (allows us to run operations)
+    auto *at_client = new AtClient(*esp32, keys);
+
+    // pkam authenticate into our atServer
+    at_client->pkam_authenticate(SSID, PASSWORD);
+
+ // key name is "test",
+ // sharedBy (creator) esp32 (@icy761),
  // sharedWith java (@driving433)
- const auto *at_key = new AtKey("test", esp32, java); 
+ const auto *at_key = new AtKey("test", esp32, java);
 
  const auto value = std::string{"Hello World!"};
 
